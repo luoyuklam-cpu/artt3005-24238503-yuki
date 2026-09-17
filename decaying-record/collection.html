@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archive Collection: Yun Gui Xiang Rice Noodles</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f4f1ea;
+            font-family: Georgia, "Times New Roman", serif;
+            color: #2c261c;
+            padding: 40px 20px;
+        }
+
+        header {
+            max-width: 1200px;
+            margin: 0 auto 40px auto;
+            border-bottom: 1px solid #2c261c;
+            padding-bottom: 20px;
+        }
+
+        h1.site-title {
+            font-size: 1.8rem;
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #6b6459;
+            font-size: 0.9rem;
+            font-family: "Courier New", Courier, monospace;
+        }
+
+        /* 網格佈局 */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 35px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ==========================================
+           3D 翻轉卡片 (3D Card & Flip Engine)
+           ========================================== */
+        .card {
+            width: 100%;
+            height: 520px;
+            perspective: 1200px;
+        }
+
+        .inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        /* 點擊翻轉狀態 */
+        .card.flipped .inner {
+            transform: rotateY(180deg);
+        }
+
+        .front, .back {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            background: #fffdf8;
+            border: 1px solid #e4ddd0;
+            box-shadow: 0 12px 32px rgba(40, 32, 20, 0.08);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ---------------- 正面 (FRONT) ---------------- */
+        .front {
+            padding: 24px;
+        }
+
+        .media-container {
+            flex: 1;
+            min-height: 240px;
+            width: 100%;
+            background: #d8d4cc;
+            border: 1px solid #c9c3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+
+        .media-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .media-container audio {
+            width: 90%;
+        }
+
+        .media-container .text-preview {
+            padding: 16px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #2c261c;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-y: auto;
+            max-height: 100%;
+            font-family: "Courier New", Courier, monospace;
+            background: #faf8f3;
+            width: 100%;
+            height: 100%;
+        }
+
+        .front-title {
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: #2c261c;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .front-meta {
+            font-size: 0.85rem;
+            color: #8a8378;
+            margin-bottom: 16px;
+        }
+
+        button.action-btn {
+            margin-top: auto;
+            align-self: stretch;
+            padding: 12px 16px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: #2c261c;
+            background: #efeae0;
+            border: 1px solid #cfc8bb;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        button.action-btn:hover {
+            background: #e6dfd2;
+        }
+
+        /* ---------------- 背面與 Fade Away 動畫 (BACK & DECAY EFFECT) ---------------- */
+        .back {
+            transform: rotateY(180deg);
+            padding: 24px;
+            font-family: "Courier New", Courier, monospace;
+            justify-content: space-between;
+        }
+
+        .label {
+            height: 100%;
+            border: 1px solid #2c261c;
+            padding: 20px 22px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .catalog {
+            font-size: 0.8rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #2c261c;
+            border-bottom: 1px solid #2c261c;
+            padding-bottom: 10px;
+            margin-bottom: 8px;
+        }
+
+        .field {
+            margin-top: 14px;
+        }
+
+        .field dt {
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #6b6459;
+            margin-bottom: 4px;
+        }
+
+        /* 預設靜止狀態（未翻轉時） */
+        .field dd {
+            font-size: 0.88rem;
+            color: #2c261c;
+            line-height: 1.4;
+            opacity: 1;
+            filter: blur(0);
+            letter-spacing: 0;
+            overflow: hidden;
+            isolation: isolate;
+            transition: filter 15s linear, opacity 15s linear, letter-spacing 15s linear;
+        }
+
+        /* 當卡片被點擊翻轉（.card.flipped）時，觸發 15 秒文字 Fade Away（模糊、散開、透明） */
+        .card.flipped .field dd {
+            opacity: 0;
+            filter: blur(8px);
+            letter-spacing: 0.55em;
+        }
+
+        /* NOT CAPTURED 欄位：延遲 12 秒後，花費 3 秒才逐漸淡出（Survives longer） */
+        .field dd.survives {
+            transition: filter 3s linear 12s, opacity 3s linear 12s, letter-spacing 3s linear 12s;
+        }
+
+        .back-btn-container {
+            margin-top: auto;
+            padding-top: 12px;
+        }
+
+        /* 錯誤提示 */
+        .load-error {
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.95rem;
+            color: #2c261c;
+            max-width: 28em;
+            margin: 50px auto;
+            line-height: 1.5;
+            text-align: center;
+            border: 1px red solid;
+            padding: 20px;
+            background: #fff0f0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 class="site-title">Archive Collection</h1>
+        <div class="subtitle">Yun Gui Xiang Rice Noodles — Decaying Sensory Specimen Cards</div>
+    </header>
+
+    <div id="error-message" class="load-error" style="display: none;">
+        records.json did not load. Are you serving the folder? Open http://localhost:8000/collection.html
+    </div>
+
+    <main class="grid-container" id="grid"></main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const grid = document.getElementById('grid');
+            const errorMessage = document.getElementById('error-message');
+
+            fetch('records.json')
+                .then(response => {
+                    if (!response.ok) throw new Error('not ok');
+                    return response.json();
+                })
+                .then(records => {
+                    records.forEach(record => {
+                        const card = createDecayingCard(record);
+                        grid.appendChild(card);
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    errorMessage.style.display = 'block';
+                });
+        });
+
+        function createDecayingCard(record) {
+            const card = document.createElement('article');
+            card.className = 'card';
+
+            const inner = document.createElement('div');
+            inner.className = 'inner';
+
+            // ---------------- 1. 正面 (FRONT) ----------------
+            const front = document.createElement('div');
+            front.className = 'front';
+
+            const mediaContainer = document.createElement('div');
+            mediaContainer.className = 'media-container';
+
+            const filePath = record.file || record.image;
+            const fileType = record.type || inferType(filePath);
+
+            if (fileType === 'image') {
+                const img = document.createElement('img');
+                img.src = filePath;
+                img.alt = record.title || 'Archive Image';
+                img.onerror = () => { mediaContainer.innerHTML = '<span style="color:#a00;font-size:0.8rem;">[Image Not Found]</span>'; };
+                mediaContainer.appendChild(img);
+            } else if (fileType === 'audio') {
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.src = filePath;
+                audio.onerror = () => { mediaContainer.innerHTML = '<span style="color:#a00;font-size:0.8rem;">[Audio Not Found]</span>'; };
+                mediaContainer.appendChild(audio);
+            } else if (fileType === 'text') {
+                const textPreview = document.createElement('div');
+                textPreview.className = 'text-preview';
+                textPreview.textContent = 'Loading text content...';
+                
+                fetch(filePath)
+                    .then(res => res.text())
+                    .then(text => { textPreview.textContent = text; })
+                    .catch(() => { textPreview.textContent = '[Failed to load .txt file]'; });
+
+                mediaContainer.appendChild(textPreview);
+            } else {
+                mediaContainer.innerHTML = `<span style="font-size:0.8rem;color:#666;">[Media: ${filePath}]</span>`;
+            }
+
+            const titleEl = document.createElement('h1');
+            titleEl.className = 'front-title';
+            titleEl.textContent = record.title || 'Untitled record';
+
+            const metaEl = document.createElement('p');
+            metaEl.className = 'front-meta';
+            metaEl.textContent = `${record.date || 'Unknown Date'}, ${record.place || 'Unknown Place'}`;
+
+            const archiveBtn = document.createElement('button');
+            archiveBtn.type = 'button';
+            archiveBtn.className = 'action-btn';
+            archiveBtn.textContent = 'Archive this';
+            
+            // 點擊「Archive this」按鈕翻轉卡片，並開啓消逝（Decay）效果
+            archiveBtn.addEventListener('click', () => {
+                card.classList.add('flipped');
+            });
+
+            front.appendChild(mediaContainer);
+            front.appendChild(titleEl);
+            front.appendChild(metaEl);
+            front.appendChild(archiveBtn);
+
+            // ---------------- 2. 背面 (BACK) ----------------
+            const back = document.createElement('div');
+            back.className = 'back';
+
+            const label = document.createElement('div');
+            label.className = 'label';
+
+            label.innerHTML = `
+                <p class="catalog">${record.catalog_id || record.id || 'REC-XXX'}</p>
+                <dl>
+                    <div class="field">
+                        <dt>Title</dt>
+                        <dd>${record.title || 'Untitled record'}</dd>
+                    </div>
+                    <div class="field">
+                        <dt>Date and place</dt>
+                        <dd>${record.date || 'Unknown'}, ${record.place || 'Unknown'}</dd>
+                    </div>
+                    <div class="field">
+                        <dt>Recorded by</dt>
+                        <dd>${record.recorder || 'Unknown recorder'}</dd>
+                    </div>
+                    <div class="field">
+                        <dt>What was not captured</dt>
+                        <dd class="survives">${record.not_captured || 'Placeholder: what this record fails to hold.'}</dd>
+                    </div>
+                </dl>
+                <div class="back-btn-container">
+                    <button type="button" class="action-btn back-btn">↩ Turn back</button>
+                </div>
+            `;
+
+            // 點擊背面的「Turn back」翻回正面，文字還原
+            const backBtn = label.querySelector('.back-btn');
+            backBtn.addEventListener('click', () => {
+                card.classList.remove('flipped');
+            });
+
+            back.appendChild(label);
+
+            // 組合
+            inner.appendChild(front);
+            inner.appendChild(back);
+            card.appendChild(inner);
+
+            return card;
+        }
+
+        function inferType(filePath) {
+            if (!filePath) return 'unknown';
+            const ext = filePath.split('.').pop().toLowerCase();
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'image';
+            if (['mp3', 'wav', 'ogg', 'm4a'].includes(ext)) return 'audio';
+            if (['txt', 'md', 'json'].includes(ext)) return 'text';
+            return 'unknown';
+        }
+    </script>
+</body>
+</html>
